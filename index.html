@@ -153,6 +153,36 @@
       background: var(--green); animation: pulse 1.5s infinite;
     }
     .match-hero__divider { width: 1px; height: 44px; background: var(--border-primary); }
+    /* Football Scoreboard */
+    .scoreboard {
+      display: flex; flex-direction: column; gap: 0;
+      background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); overflow: hidden; min-width: 180px;
+    }
+    .scoreboard__header {
+      display: grid; grid-template-columns: 1fr auto auto auto 1fr;
+      gap: 0; font-size: 9px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted); padding: 3px 0;
+      background: var(--bg-input); border-bottom: 1px solid var(--border-subtle);
+    }
+    .scoreboard__header span { text-align: center; padding: 0 8px; }
+    .scoreboard__header span:first-child { text-align: right; }
+    .scoreboard__header span:last-child { text-align: left; }
+    .scoreboard__row {
+      display: grid; grid-template-columns: 1fr auto auto auto 1fr;
+      gap: 0; font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+      padding: 3px 0; border-bottom: 1px solid var(--border-subtle);
+    }
+    .scoreboard__row:last-child { border-bottom: none; }
+    .scoreboard__row span { text-align: center; padding: 0 8px; min-width: 24px; }
+    .scoreboard__row span:first-child { text-align: right; color: var(--text-primary); }
+    .scoreboard__row span:last-child { text-align: left; color: var(--text-primary); }
+    .scoreboard__icon { font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .scoreboard__icon--yellow { color: #eab308; }
+    .scoreboard__icon--red { color: var(--red); }
+    .scoreboard__icon--corner { color: var(--text-muted); font-size: 9px; }
+    .scoreboard__sep { color: var(--text-muted); font-weight: 400; font-size: 10px; }
+
     .match-hero__stats { display: flex; gap: 20px; }
     .match-hero__stat { display: flex; flex-direction: column; gap: 1px; }
     .match-hero__stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -813,6 +843,37 @@
             <div className="match-hero__team">
               <div className="match-hero__team-name">Liverpool</div>
               <div className="match-hero__team-meta">Away</div>
+            </div>
+          </div>
+          <div className="match-hero__divider"></div>
+          <div className="scoreboard">
+            <div className="scoreboard__header">
+              <span>HOME</span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span>AWAY</span>
+            </div>
+            <div className="scoreboard__row">
+              <span>3</span>
+              <span className="scoreboard__icon scoreboard__icon--yellow">&#9632;</span>
+              <span className="scoreboard__sep">YC</span>
+              <span className="scoreboard__icon scoreboard__icon--yellow">&#9632;</span>
+              <span>2</span>
+            </div>
+            <div className="scoreboard__row">
+              <span>0</span>
+              <span className="scoreboard__icon scoreboard__icon--red">&#9632;</span>
+              <span className="scoreboard__sep">RC</span>
+              <span className="scoreboard__icon scoreboard__icon--red">&#9632;</span>
+              <span>0</span>
+            </div>
+            <div className="scoreboard__row">
+              <span>4</span>
+              <span className="scoreboard__icon scoreboard__icon--corner">&#9698;</span>
+              <span className="scoreboard__sep">CRN</span>
+              <span className="scoreboard__icon scoreboard__icon--corner">&#9698;</span>
+              <span>3</span>
             </div>
           </div>
           <div className="match-hero__divider"></div>
