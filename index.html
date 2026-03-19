@@ -322,6 +322,7 @@
     .mkt--settled { border-left: 3px solid var(--settled); }
     .mkt--void { border-left: 3px solid var(--void); }
     .mkt--settling { border-left: 3px solid var(--orange); }
+    .mkt--cancelling { border-left: 3px solid var(--red); }
     .mkt--bet-closed { border-left: 3px solid var(--red); }
 
     .mkt__header {
@@ -352,6 +353,7 @@
     .mkt__badge--settled { background: var(--settled-bg); color: var(--settled); border: 1px solid var(--settled-border); }
     .mkt__badge--void { background: var(--void-bg); color: var(--void); border: 1px solid var(--void-border); }
     .mkt__badge--settling { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+    .mkt__badge--cancelling { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
     .mkt__badge--bet-closed { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
     .mkt__header-right {
       margin-left: auto; display: flex; align-items: center; gap: 4px; flex-shrink: 0;
@@ -919,7 +921,8 @@
       const isVoid = marketStatus === 'void';
       const isSettling = marketStatus === 'settling' && settlingSelId === s.id;
       const isWinner = isSettled && marketSettled === s.id;
-      const isDisabled = (marketStatus === 'settling' && settlingSelId !== s.id) || (isSettled && !isWinner);
+      const isCancelling = marketStatus === 'cancelling';
+      const isDisabled = (marketStatus === 'settling' && settlingSelId !== s.id) || (isSettled && !isWinner) || isCancelling;
 
       let cls = 'sel';
       if (isWinner) cls += ' sel--winner';
@@ -928,8 +931,8 @@
       else if (isDisabled) cls += ' sel--disabled';
 
       return (
-        <div className={cls} onClick={(!isSettled && !isVoid) ? () => onClick(s.id) : undefined}
-          style={{ cursor: (isSettled || isVoid) ? 'default' : 'pointer' }}>
+        <div className={cls} onClick={(!isSettled && !isVoid && !isCancelling) ? () => onClick(s.id) : undefined}
+          style={{ cursor: (isSettled || isVoid || isCancelling) ? 'default' : 'pointer' }}>
           <span className="sel__name">{s.name}</span>
           {isSettling && <div className="sel__countdown" style={{ width: `${countdownPct}%` }}></div>}
         </div>
@@ -937,13 +940,14 @@
     }
 
     // Market Card - handles both flat markets and line-based markets
-    function MarketCard({ market, settlingState, onSelectionClick, onStopSettlement, onCancel, onRollback, onToggleFavorite, onLineSelectionClick, onStopLineSettlement, onCancelLine, onRollbackLine, lineSettlingMap }) {
+    function MarketCard({ market, settlingState, cancellingState, onSelectionClick, onStopSettlement, onCancel, onStopCancel, onRollback, onToggleFavorite, onLineSelectionClick, onStopLineSettlement, onCancelLine, onStopLineCancel, onRollbackLine, lineSettlingMap, lineCancellingMap }) {
       const hasLines = market.lines && market.lines.length > 0;
 
       // For flat markets
       const isSettling = market.status === 'settling';
-      const countdown = settlingState?.countdown;
-      const countdownPct = settlingState ? (settlingState.countdown / COUNTDOWN_SECONDS) * 100 : 0;
+      const isCancelling = market.status === 'cancelling';
+      const countdown = settlingState?.countdown || cancellingState?.countdown;
+      const countdownPct = settlingState ? (settlingState.countdown / COUNTDOWN_SECONDS) * 100 : cancellingState ? (cancellingState.countdown / COUNTDOWN_SECONDS) * 100 : 0;
       const statusLabel = market.status;
 
       // Compute overall status for line-based markets
@@ -952,6 +956,7 @@
         if (statuses.every(s => s === 'settled')) return 'settled';
         if (statuses.every(s => s === 'void')) return 'void';
         if (statuses.some(s => s === 'settling')) return 'settling';
+        if (statuses.some(s => s === 'cancelling')) return 'cancelling';
         return 'open';
       })() : market.status;
 
@@ -967,10 +972,10 @@
             <span className="mkt__name">{market.name}</span>
             <div className="mkt__header-right">
               <span className={`mkt__badge mkt__badge--${displayStatus}`}>{displayStatus}</span>
-              {!hasLines && !isSettling && market.status !== 'void' && market.status !== 'settled' && (
+              {!hasLines && !isSettling && !isCancelling && market.status !== 'void' && market.status !== 'settled' && (
                 <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancel(market.id)}>Cancel</button>
               )}
-              {!hasLines && !isSettling && (market.status === 'settled' || market.status === 'void') && (
+              {!hasLines && !isSettling && !isCancelling && (market.status === 'settled' || market.status === 'void') && (
                 <button className="mkt-btn mkt-btn--rollback" onClick={() => onRollback(market.id)}>Rollback</button>
               )}
             </div>
@@ -980,11 +985,13 @@
             <div className="mkt__lines">
               {market.lines.map(line => {
                 const ls = lineSettlingMap?.[line.id];
+                const lc = lineCancellingMap?.[line.id];
                 const lineCountdownPct = ls ? (ls.countdown / COUNTDOWN_SECONDS) * 100 : 0;
                 const lineIsSettling = line.status === 'settling';
+                const lineIsCancelling = line.status === 'cancelling';
                 const sels = line.selections;
                 return (
-                  <div key={line.id} className={`mkt-line ${line.status === 'settled' ? 'mkt-line--settled' : ''} ${lineIsSettling ? 'mkt-line--settling' : ''}`}>
+                  <div key={line.id} className={`mkt-line ${line.status === 'settled' ? 'mkt-line--settled' : ''} ${lineIsSettling ? 'mkt-line--settling' : ''} ${lineIsCancelling ? 'mkt-line--settling' : ''}`}>
                     {sels.length === 2 ? (
                       <>
                         <div className="mkt-line__sel">
@@ -1028,7 +1035,13 @@
                         <button className="mkt-btn mkt-btn--stop" onClick={() => onStopLineSettlement(market.id, line.id)}>Stop</button>
                       </div>
                     )}
-                    {line.status === 'open' && !lineIsSettling && (
+                    {lineIsCancelling && lc && (
+                      <div className="mkt-line__actions">
+                        <span style={{fontFamily:'var(--font-mono)',fontSize:11,fontWeight:800,color:'var(--red)'}}>{lc.countdown}</span>
+                        <button className="mkt-btn mkt-btn--stop" onClick={() => onStopLineCancel(market.id, line.id)}>Stop</button>
+                      </div>
+                    )}
+                    {line.status === 'open' && !lineIsSettling && !lineIsCancelling && (
                       <div className="mkt-line__actions">
                         <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancelLine(market.id, line.id, line.specifier)}>Cancel</button>
                       </div>
@@ -1064,6 +1077,16 @@
                   </div>
                   <div className="mkt__actions-spacer"></div>
                   <button className="mkt-btn mkt-btn--stop" onClick={() => onStopSettlement(market.id)}>Stop</button>
+                </div>
+              )}
+              {isCancelling && (
+                <div className="mkt__actions">
+                  <div className="mkt__settling-info" style={{color:'var(--red)'}}>
+                    <span className="mkt__settling-countdown" style={{color:'var(--red)'}}>{cancellingState?.countdown}</span>
+                    <span>Cancelling...</span>
+                  </div>
+                  <div className="mkt__actions-spacer"></div>
+                  <button className="mkt-btn mkt-btn--stop" onClick={() => onStopCancel(market.id)}>Stop</button>
                 </div>
               )}
             </>
@@ -1162,7 +1185,7 @@
     // Market columns: fill left-to-right sequentially (no balancing)
     const NUM_COLS = 3;
 
-    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket, toggleFavorite, handleLineSelectionClick, stopLineSettlement, cancelLine, rollbackLine, lineSettlingMap }) {
+    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, cancellingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket, toggleFavorite, handleLineSelectionClick, stopLineSettlement, cancelLine, stopLineCancel, rollbackLine, lineSettlingMap, lineCancellingMap, stopCancel }) {
       // Flatten all renderable items: group headers + market cards
       const items = [];
       Object.entries(groupedMarkets).forEach(([groupKey, gm]) => {
@@ -1229,16 +1252,20 @@
             key={m.id}
             market={m}
             settlingState={settlingMap[m.id]}
+            cancellingState={cancellingMap[m.id]}
             onSelectionClick={selId => handleSelectionClick(m.id, selId)}
             onStopSettlement={stopSettlement}
             onCancel={id => setModal({ type: 'cancel', marketId: id })}
+            onStopCancel={stopCancel}
             onRollback={rollbackMarket}
             onToggleFavorite={toggleFavorite}
             onLineSelectionClick={handleLineSelectionClick}
             onStopLineSettlement={stopLineSettlement}
             onCancelLine={(marketId, lineId, lineSpec) => setModal({ type: 'cancel-line', marketId, lineId, lineSpec })}
+            onStopLineCancel={stopLineCancel}
             onRollbackLine={rollbackLine}
             lineSettlingMap={lineSettlingMap}
+            lineCancellingMap={lineCancellingMap}
           />
         );
       };
@@ -1369,14 +1396,43 @@
       }, [markets, startSettlement, stopSettlement]);
 
       // Cancel market (void)
+      // Cancelling countdowns: { [marketId]: { reason, countdown, intervalId } }
+      const [cancellingMap, setCancellingMap] = useState({});
+      const cancellingMapRef = useRef(cancellingMap);
+      cancellingMapRef.current = cancellingMap;
+
       const cancelMarket = useCallback((marketId, reason) => {
         // Stop any settlement in progress
         const entry = settlingMapRef.current[marketId];
         if (entry) { clearInterval(entry.intervalId); setSettlingMap(prev => { const n = { ...prev }; delete n[marketId]; return n; }); }
 
-        setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'void', settled: null } : m));
+        setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'cancelling' } : m));
         setModal(null);
-        setToast({ message: 'Market cancelled (void)', type: 'error' });
+
+        let remaining = COUNTDOWN_SECONDS;
+        const cEntry = { reason, countdown: remaining, intervalId: null };
+        cEntry.intervalId = setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            clearInterval(cEntry.intervalId);
+            setCancellingMap(prev => { const n = { ...prev }; delete n[marketId]; return n; });
+            setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'void', settled: null } : m));
+            setToast({ message: 'Market cancelled (void)', type: 'error' });
+          } else {
+            setCancellingMap(prev => ({ ...prev, [marketId]: { ...prev[marketId], countdown: remaining } }));
+          }
+        }, 1000);
+        setCancellingMap(prev => ({ ...prev, [marketId]: cEntry }));
+      }, []);
+
+      const stopCancel = useCallback(marketId => {
+        const entry = cancellingMapRef.current[marketId];
+        if (entry) {
+          clearInterval(entry.intervalId);
+          setCancellingMap(prev => { const n = { ...prev }; delete n[marketId]; return n; });
+          setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'open' } : m));
+          setToast({ message: 'Cancel stopped', type: 'info' });
+        }
       }, []);
 
       // Rollback settled -> open (ready for re-settlement)
@@ -1449,15 +1505,51 @@
         startLineSettlement(marketId, lineId, selectionId);
       }, [markets, startLineSettlement, stopLineSettlement]);
 
+      // Line cancelling countdowns: { [lineId]: { reason, countdown, intervalId } }
+      const [lineCancellingMap, setLineCancellingMap] = useState({});
+      const lineCancellingMapRef = useRef(lineCancellingMap);
+      lineCancellingMapRef.current = lineCancellingMap;
+
       const cancelLine = useCallback((marketId, lineId, reason) => {
         const entry = lineSettlingMapRef.current[lineId];
         if (entry) { clearInterval(entry.intervalId); setLineSettlingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; }); }
+
         setMarkets(prev => prev.map(m => {
           if (m.id !== marketId || !m.lines) return m;
-          return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'void', settled: null } : l) };
+          return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'cancelling' } : l) };
         }));
         setModal(null);
-        setToast({ message: `Line voided: ${reason}`, type: 'error' });
+
+        let remaining = COUNTDOWN_SECONDS;
+        const cEntry = { reason, countdown: remaining, intervalId: null };
+        cEntry.intervalId = setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            clearInterval(cEntry.intervalId);
+            setLineCancellingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; });
+            setMarkets(prev => prev.map(m => {
+              if (m.id !== marketId || !m.lines) return m;
+              return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'void', settled: null } : l) };
+            }));
+            setToast({ message: `Line voided: ${reason}`, type: 'error' });
+          } else {
+            setLineCancellingMap(prev => ({ ...prev, [lineId]: { ...prev[lineId], countdown: remaining } }));
+          }
+        }, 1000);
+        setLineCancellingMap(prev => ({ ...prev, [lineId]: cEntry }));
+      }, []);
+
+      const stopLineCancel = useCallback((marketId, lineId) => {
+        const entry = lineCancellingMapRef.current[lineId];
+        if (entry) {
+          clearInterval(entry.intervalId);
+          setLineCancellingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; });
+          setMarkets(prev => prev.map(m => {
+            if (m.id !== marketId || !m.lines) return m;
+            return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'open' } : l) };
+          }));
+          setToast({ message: 'Cancel stopped', type: 'info' });
+        }
       }, []);
 
       const rollbackLine = useCallback((marketId, lineId) => {
@@ -1502,6 +1594,8 @@
         return () => {
           Object.values(settlingMapRef.current).forEach(e => clearInterval(e.intervalId));
           Object.values(lineSettlingMapRef.current).forEach(e => clearInterval(e.intervalId));
+          Object.values(cancellingMapRef.current).forEach(e => clearInterval(e.intervalId));
+          Object.values(lineCancellingMapRef.current).forEach(e => clearInterval(e.intervalId));
         };
       }, []);
 
@@ -1568,16 +1662,20 @@
                 activeTab={activeTab}
                 filteredMarkets={filteredMarkets}
                 settlingMap={settlingMap}
+                cancellingMap={cancellingMap}
                 handleSelectionClick={handleSelectionClick}
                 stopSettlement={stopSettlement}
                 setModal={setModal}
                 rollbackMarket={rollbackMarket}
+                stopCancel={stopCancel}
                 toggleFavorite={toggleFavorite}
                 handleLineSelectionClick={handleLineSelectionClick}
                 stopLineSettlement={stopLineSettlement}
                 cancelLine={cancelLine}
+                stopLineCancel={stopLineCancel}
                 rollbackLine={rollbackLine}
                 lineSettlingMap={lineSettlingMap}
+                lineCancellingMap={lineCancellingMap}
               />
             </div>
           </div>
