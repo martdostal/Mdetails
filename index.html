@@ -319,6 +319,7 @@
     }
     .mkt:hover { border-color: var(--border-primary); }
     .mkt--open { border-left: 3px solid var(--blue); }
+    .mkt--suspended { border-left: 3px solid var(--orange); }
     .mkt--settled { border-left: 3px solid var(--settled); }
     .mkt--void { border-left: 3px solid var(--void); }
     .mkt--settling { border-left: 3px solid var(--orange); }
@@ -350,6 +351,7 @@
       letter-spacing: 0.3px; padding: 1px 6px; border-radius: 8px; flex-shrink: 0;
     }
     .mkt__badge--open { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+    .mkt__badge--suspended { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
     .mkt__badge--settled { background: var(--settled-bg); color: var(--settled); border: 1px solid var(--settled-border); }
     .mkt__badge--void { background: var(--void-bg); color: var(--void); border: 1px solid var(--void-border); }
     .mkt__badge--settling { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
@@ -807,7 +809,7 @@
 
     function MatchHero({ matchTime, markets, onOpenAll, onSuspendAll }) {
       const counts = useMemo(() => {
-        const c = { open: 0, settled: 0, void: 0, settling: 0, betClosed: 0 };
+        const c = { open: 0, suspended: 0, settled: 0, void: 0, settling: 0, betClosed: 0 };
         markets.forEach(m => { if (c[m.status] !== undefined) c[m.status]++; else if (m.status === 'bet-closed') c.betClosed++; });
         return c;
       }, [markets]);
@@ -848,8 +850,8 @@
               <span className="match-hero__stat-value" style={{color:'var(--blue)'}}>{counts.open}</span>
             </div>
             <div className="match-hero__stat">
-              <span className="match-hero__stat-label">Settling</span>
-              <span className="match-hero__stat-value" style={{color:'var(--orange)'}}>{counts.settling}</span>
+              <span className="match-hero__stat-label">Suspended</span>
+              <span className="match-hero__stat-value" style={{color:'var(--orange)'}}>{counts.suspended}</span>
             </div>
             <div className="match-hero__stat">
               <span className="match-hero__stat-label">Settled</span>
@@ -957,6 +959,8 @@
         if (statuses.every(s => s === 'void')) return 'void';
         if (statuses.some(s => s === 'settling')) return 'settling';
         if (statuses.some(s => s === 'cancelling')) return 'cancelling';
+        if (statuses.every(s => s === 'suspended')) return 'suspended';
+        if (statuses.some(s => s === 'suspended')) return 'open';
         return 'open';
       })() : market.status;
 
@@ -1041,7 +1045,7 @@
                         <button className="mkt-btn mkt-btn--stop" onClick={() => onStopLineCancel(market.id, line.id)}>Stop</button>
                       </div>
                     )}
-                    {line.status === 'open' && !lineIsSettling && !lineIsCancelling && (
+                    {(line.status === 'open' || line.status === 'suspended') && !lineIsSettling && !lineIsCancelling && (
                       <div className="mkt-line__actions">
                         <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancelLine(market.id, line.id, line.specifier)}>Cancel</button>
                       </div>
@@ -1391,7 +1395,7 @@
           return;
         }
 
-        if (market.status !== 'open') return;
+        if (market.status !== 'open' && market.status !== 'suspended') return;
         startSettlement(marketId, selectionId);
       }, [markets, startSettlement, stopSettlement]);
 
@@ -1501,7 +1505,7 @@
           }
           return;
         }
-        if (line.status !== 'open') return;
+        if (line.status !== 'open' && line.status !== 'suspended') return;
         startLineSettlement(marketId, lineId, selectionId);
       }, [markets, startLineSettlement, stopLineSettlement]);
 
@@ -1585,7 +1589,7 @@
         // Stop all settlements
         Object.entries(settlingMapRef.current).forEach(([, e]) => clearInterval(e.intervalId));
         setSettlingMap({});
-        setMarkets(prev => prev.map(m => (m.status === 'settled' || m.status === 'void') ? m : { ...m, status: 'open' }));
+        setMarkets(prev => prev.map(m => (m.status === 'settled' || m.status === 'void') ? m : { ...m, status: 'suspended' }));
         setToast({ message: 'All markets suspended', type: 'warning' });
       }, []);
 
@@ -1626,7 +1630,7 @@
       }, [markets]);
 
       const statusCounts = useMemo(() => {
-        const c = { open: 0, settling: 0, settled: 0, void: 0 };
+        const c = { open: 0, suspended: 0, settling: 0, settled: 0, void: 0 };
         markets.forEach(m => { if (c[m.status] !== undefined) c[m.status]++; });
         return c;
       }, [markets]);
@@ -1652,7 +1656,7 @@
                 </div>
                 <div className="market-tabs__summary">
                   <span><span className="market-tabs__dot" style={{background:'var(--blue)'}}></span>{statusCounts.open}</span>
-                  <span><span className="market-tabs__dot" style={{background:'var(--orange)'}}></span>{statusCounts.settling}</span>
+                  <span><span className="market-tabs__dot" style={{background:'var(--orange)'}}></span>{statusCounts.suspended}</span>
                   <span><span className="market-tabs__dot" style={{background:'var(--settled)'}}></span>{statusCounts.settled}</span>
                   <span><span className="market-tabs__dot" style={{background:'var(--void)'}}></span>{statusCounts.void}</span>
                 </div>
