@@ -383,6 +383,34 @@
       transition: none;
     }
 
+    /* Lines layout (for merged markets like Total Goals) */
+    .mkt__lines { padding: 0 8px 6px; }
+    .mkt-line {
+      display: flex; align-items: center; gap: 4px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .mkt-line:last-child { border-bottom: none; }
+    .mkt-line__spec {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      color: var(--text-secondary); min-width: 30px; text-align: center;
+    }
+    .mkt-line__sels {
+      display: flex; gap: 3px; flex: 1;
+    }
+    .mkt-line__badge {
+      font-size: 7px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.3px; padding: 1px 5px; border-radius: 6px; flex-shrink: 0;
+      margin-left: auto;
+    }
+    .mkt-line__badge--settled { background: var(--settled-bg); color: var(--settled); border: 1px solid var(--settled-border); }
+    .mkt-line__badge--void { background: var(--void-bg); color: var(--void); border: 1px solid var(--void-border); }
+    .mkt-line__actions {
+      display: flex; gap: 3px; margin-left: 4px; flex-shrink: 0;
+    }
+    .mkt-line--settled { opacity: 0.7; }
+    .mkt-line--settling .mkt-line__spec { color: var(--orange); }
+
     /* Market actions - inline compact */
     .mkt__actions {
       display: flex; align-items: center; gap: 4px;
@@ -498,14 +526,14 @@
         sel('dnb-1', 'Manchester United'), sel('dnb-2', 'Liverpool')] },
 
       // GOALS
-      { id: 'total-goals-1.5', name: 'Total Goals', specifier: '1.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
-        sel('tg15-o', 'Over 1.5'), sel('tg15-u', 'Under 1.5')] },
-      { id: 'total-goals-2.5', name: 'Total Goals', specifier: '2.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
-        sel('tg25-o', 'Over 2.5'), sel('tg25-u', 'Under 2.5')] },
-      { id: 'total-goals-3.5', name: 'Total Goals', specifier: '3.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
-        sel('tg35-o', 'Over 3.5'), sel('tg35-u', 'Under 3.5')] },
-      { id: 'total-goals-4.5', name: 'Total Goals', specifier: '4.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
-        sel('tg45-o', 'Over 4.5'), sel('tg45-u', 'Under 4.5')] },
+      { id: 'total-goals', name: 'Total Goals', group: 'goals', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '0.5', id: 'total-goals-0.5', status: 'open', settled: null, selections: [sel('tg05-o', 'Over'), sel('tg05-u', 'Under')] },
+        { specifier: '1.5', id: 'total-goals-1.5', status: 'open', settled: null, selections: [sel('tg15-o', 'Over'), sel('tg15-u', 'Under')] },
+        { specifier: '2.5', id: 'total-goals-2.5', status: 'open', settled: null, selections: [sel('tg25-o', 'Over'), sel('tg25-u', 'Under')] },
+        { specifier: '3.5', id: 'total-goals-3.5', status: 'open', settled: null, selections: [sel('tg35-o', 'Over'), sel('tg35-u', 'Under')] },
+        { specifier: '4.5', id: 'total-goals-4.5', status: 'open', settled: null, selections: [sel('tg45-o', 'Over'), sel('tg45-u', 'Under')] },
+        { specifier: '5.5', id: 'total-goals-5.5', status: 'open', settled: null, selections: [sel('tg55-o', 'Over'), sel('tg55-u', 'Under')] },
+      ] },
       { id: 'btts', name: 'Both Teams To Score', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('btts-y', 'Yes'), sel('btts-n', 'No')] },
       { id: 'btts-ht', name: 'BTTS 1st Half', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
@@ -514,10 +542,16 @@
         sel('eg-0', '0'), sel('eg-1', '1'), sel('eg-2', '2'), sel('eg-3', '3'), sel('eg-4', '4'), sel('eg-5+', '5+')] },
       { id: 'first-goal', name: 'First Goal', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('fg-1', 'Man Utd'), sel('fg-2', 'Liverpool'), sel('fg-none', 'No Goal')] },
-      { id: 'home-total-goals-1.5', name: 'Home Total Goals', specifier: '1.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
-        sel('htg15-o', 'Over 1.5'), sel('htg15-u', 'Under 1.5')] },
-      { id: 'away-total-goals-1.5', name: 'Away Total Goals', specifier: '1.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
-        sel('atg15-o', 'Over 1.5'), sel('atg15-u', 'Under 1.5')] },
+      { id: 'home-total-goals', name: 'Home Total Goals', group: 'goals', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '0.5', id: 'home-total-goals-0.5', status: 'open', settled: null, selections: [sel('htg05-o', 'Over'), sel('htg05-u', 'Under')] },
+        { specifier: '1.5', id: 'home-total-goals-1.5', status: 'open', settled: null, selections: [sel('htg15-o', 'Over'), sel('htg15-u', 'Under')] },
+        { specifier: '2.5', id: 'home-total-goals-2.5', status: 'open', settled: null, selections: [sel('htg25-o', 'Over'), sel('htg25-u', 'Under')] },
+      ] },
+      { id: 'away-total-goals', name: 'Away Total Goals', group: 'goals', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '0.5', id: 'away-total-goals-0.5', status: 'open', settled: null, selections: [sel('atg05-o', 'Over'), sel('atg05-u', 'Under')] },
+        { specifier: '1.5', id: 'away-total-goals-1.5', status: 'open', settled: null, selections: [sel('atg15-o', 'Over'), sel('atg15-u', 'Under')] },
+        { specifier: '2.5', id: 'away-total-goals-2.5', status: 'open', settled: null, selections: [sel('atg25-o', 'Over'), sel('atg25-u', 'Under')] },
+      ] },
       { id: 'odd-even-goals', name: 'Odd/Even Goals', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('oe-odd', 'Odd'), sel('oe-even', 'Even')] },
 
@@ -528,10 +562,11 @@
         sel('htft-11', '1/1'), sel('htft-1x', '1/X'), sel('htft-12', '1/2'),
         sel('htft-x1', 'X/1'), sel('htft-xx', 'X/X'), sel('htft-x2', 'X/2'),
         sel('htft-21', '2/1'), sel('htft-2x', '2/X'), sel('htft-22', '2/2')] },
-      { id: 'ht-total-goals-0.5', name: 'HT Total Goals', specifier: '0.5', group: 'halves', status: 'settled', favorite: false, settled: 'httg05-o', selections: [
-        sel('httg05-o', 'Over 0.5'), sel('httg05-u', 'Under 0.5')] },
-      { id: 'ht-total-goals-1.5', name: 'HT Total Goals', specifier: '1.5', group: 'halves', status: 'settled', favorite: false, settled: 'httg15-u', selections: [
-        sel('httg15-o', 'Over 1.5'), sel('httg15-u', 'Under 1.5')] },
+      { id: 'ht-total-goals', name: 'HT Total Goals', group: 'halves', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '0.5', id: 'ht-total-goals-0.5', status: 'settled', settled: 'httg05-o', selections: [sel('httg05-o', 'Over'), sel('httg05-u', 'Under')] },
+        { specifier: '1.5', id: 'ht-total-goals-1.5', status: 'settled', settled: 'httg15-u', selections: [sel('httg15-o', 'Over'), sel('httg15-u', 'Under')] },
+        { specifier: '2.5', id: 'ht-total-goals-2.5', status: 'open', settled: null, selections: [sel('httg25-o', 'Over'), sel('httg25-u', 'Under')] },
+      ] },
       { id: 'ht-double-chance', name: 'HT Double Chance', group: 'halves', status: 'settled', favorite: false, settled: 'htdc-1x', selections: [
         sel('htdc-1x', '1X'), sel('htdc-12', '12'), sel('htdc-x2', 'X2')] },
       { id: 'highest-scoring-half', name: 'Highest Scoring Half', group: 'halves', status: 'open', favorite: false, settled: null, selections: [
@@ -746,62 +781,123 @@
         <div className={cls} onClick={(!isSettled && !isVoid) ? () => onClick(s.id) : undefined}
           style={{ cursor: (isSettled || isVoid) ? 'default' : 'pointer' }}>
           <span className="sel__name">{s.name}</span>
-          {isWinner && <span className="sel__winner-icon">\u2713</span>}
           {isSettling && <div className="sel__countdown" style={{ width: `${countdownPct}%` }}></div>}
         </div>
       );
     }
 
-    // Market Card
-    function MarketCard({ market, settlingState, onSelectionClick, onStopSettlement, onCancel, onRollback, onToggleFavorite }) {
+    // Market Card - handles both flat markets and line-based markets
+    function MarketCard({ market, settlingState, onSelectionClick, onStopSettlement, onCancel, onRollback, onToggleFavorite, onLineSelectionClick, onStopLineSettlement, onCancelLine, onRollbackLine, lineSettlingMap }) {
+      const hasLines = market.lines && market.lines.length > 0;
+
+      // For flat markets
       const isSettling = market.status === 'settling';
       const countdown = settlingState?.countdown;
       const countdownPct = settlingState ? (settlingState.countdown / COUNTDOWN_SECONDS) * 100 : 0;
       const statusLabel = market.status;
-      const showActions = isSettling || market.status === 'settled' || (market.status !== 'void');
+
+      // Compute overall status for line-based markets
+      const lineOverallStatus = hasLines ? (() => {
+        const statuses = market.lines.map(l => l.status);
+        if (statuses.every(s => s === 'settled')) return 'settled';
+        if (statuses.every(s => s === 'void')) return 'void';
+        if (statuses.some(s => s === 'settling')) return 'settling';
+        return 'open';
+      })() : market.status;
+
+      const displayStatus = hasLines ? lineOverallStatus : market.status;
 
       return (
-        <div className={`mkt mkt--${market.status}`}>
+        <div className={`mkt mkt--${displayStatus}`}>
           <div className="mkt__header">
             <button className={`mkt__star ${market.favorite ? 'mkt__star--active' : ''}`}
               onClick={() => onToggleFavorite(market.id)}>
               {market.favorite ? '\u2605' : '\u2606'}
             </button>
-            <span className="mkt__name">
-              {market.name}
-              {market.specifier && <span className="mkt__specifier">{market.specifier}</span>}
-            </span>
+            <span className="mkt__name">{market.name}</span>
             <div className="mkt__header-right">
-              <span className={`mkt__badge mkt__badge--${market.status}`}>{statusLabel}</span>
-              {!isSettling && market.status !== 'void' && market.status !== 'settled' && (
+              <span className={`mkt__badge mkt__badge--${displayStatus}`}>{displayStatus}</span>
+              {!hasLines && !isSettling && market.status !== 'void' && market.status !== 'settled' && (
                 <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancel(market.id)}>Cancel</button>
               )}
-              {!isSettling && market.status === 'settled' && (
+              {!hasLines && !isSettling && market.status === 'settled' && (
                 <button className="mkt-btn mkt-btn--rollback" onClick={() => onRollback(market.id)}>Rollback</button>
               )}
             </div>
           </div>
-          <div className="mkt__sels">
-            {market.selections.map(s => (
-              <SelectionBtn
-                key={s.id} s={s}
-                marketStatus={market.status}
-                marketSettled={market.settled}
-                settlingSelId={settlingState?.selectionId}
-                countdownPct={countdownPct}
-                onClick={onSelectionClick}
-              />
-            ))}
-          </div>
-          {isSettling && (
-            <div className="mkt__actions">
-              <div className="mkt__settling-info">
-                <span className="mkt__settling-countdown">{countdown}</span>
-                <span>&#8594; <strong>{market.selections.find(s => s.id === settlingState?.selectionId)?.name}</strong></span>
-              </div>
-              <div className="mkt__actions-spacer"></div>
-              <button className="mkt-btn mkt-btn--stop" onClick={() => onStopSettlement(market.id)}>Stop</button>
+
+          {hasLines ? (
+            <div className="mkt__lines">
+              {market.lines.map(line => {
+                const ls = lineSettlingMap?.[line.id];
+                const lineCountdownPct = ls ? (ls.countdown / COUNTDOWN_SECONDS) * 100 : 0;
+                const lineIsSettling = line.status === 'settling';
+                return (
+                  <div key={line.id} className={`mkt-line ${line.status === 'settled' ? 'mkt-line--settled' : ''} ${lineIsSettling ? 'mkt-line--settling' : ''}`}>
+                    <span className="mkt-line__spec">{line.specifier}</span>
+                    <div className="mkt-line__sels">
+                      {line.selections.map(s => (
+                        <SelectionBtn
+                          key={s.id} s={s}
+                          marketStatus={line.status}
+                          marketSettled={line.settled}
+                          settlingSelId={ls?.selectionId}
+                          countdownPct={lineCountdownPct}
+                          onClick={selId => onLineSelectionClick(market.id, line.id, selId)}
+                        />
+                      ))}
+                    </div>
+                    {line.status === 'settled' && (
+                      <>
+                        <span className="mkt-line__badge mkt-line__badge--settled">settled</span>
+                        <div className="mkt-line__actions">
+                          <button className="mkt-btn mkt-btn--rollback" onClick={() => onRollbackLine(market.id, line.id)}>Rollback</button>
+                        </div>
+                      </>
+                    )}
+                    {line.status === 'void' && (
+                      <span className="mkt-line__badge mkt-line__badge--void">void</span>
+                    )}
+                    {lineIsSettling && ls && (
+                      <div className="mkt-line__actions">
+                        <span style={{fontFamily:'var(--font-mono)',fontSize:11,fontWeight:800,color:'var(--orange)'}}>{ls.countdown}</span>
+                        <button className="mkt-btn mkt-btn--stop" onClick={() => onStopLineSettlement(market.id, line.id)}>Stop</button>
+                      </div>
+                    )}
+                    {line.status === 'open' && !lineIsSettling && (
+                      <div className="mkt-line__actions">
+                        <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancelLine(market.id, line.id)}>Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          ) : (
+            <>
+              <div className="mkt__sels">
+                {market.selections.map(s => (
+                  <SelectionBtn
+                    key={s.id} s={s}
+                    marketStatus={market.status}
+                    marketSettled={market.settled}
+                    settlingSelId={settlingState?.selectionId}
+                    countdownPct={countdownPct}
+                    onClick={onSelectionClick}
+                  />
+                ))}
+              </div>
+              {isSettling && (
+                <div className="mkt__actions">
+                  <div className="mkt__settling-info">
+                    <span className="mkt__settling-countdown">{countdown}</span>
+                    <span>&#8594; <strong>{market.selections.find(s => s.id === settlingState?.selectionId)?.name}</strong></span>
+                  </div>
+                  <div className="mkt__actions-spacer"></div>
+                  <button className="mkt-btn mkt-btn--stop" onClick={() => onStopSettlement(market.id)}>Stop</button>
+                </div>
+              )}
+            </>
           )}
         </div>
       );
@@ -872,7 +968,7 @@
     // Market columns: fill left-to-right sequentially (no balancing)
     const NUM_COLS = 3;
 
-    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket, toggleFavorite }) {
+    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket, toggleFavorite, handleLineSelectionClick, stopLineSettlement, cancelLine, rollbackLine, lineSettlingMap }) {
       // Flatten all renderable items: group headers + market cards
       const items = [];
       Object.entries(groupedMarkets).forEach(([groupKey, gm]) => {
@@ -886,13 +982,17 @@
       // Group header ~24px, market ~(28 + selections_rows * 28)px
       function estimateHeight(item) {
         if (item.type === 'group-header') return 28;
-        const n = item.market.selections.length;
-        // selections are flex-wrap pills, roughly 5-6 per row in a column
+        const m = item.market;
+        if (m.lines) {
+          // Line-based market: header + one row per line
+          return 32 + m.lines.length * 32 + 6;
+        }
+        const n = m.selections ? m.selections.length : 0;
         const selRows = Math.ceil(n / 5);
-        const base = 32; // header
+        const base = 32;
         const sels = selRows * 28;
-        const settling = item.market.status === 'settling' ? 30 : 0;
-        return base + sels + settling + 6; // margin
+        const settling = m.status === 'settling' ? 30 : 0;
+        return base + sels + settling + 6;
       }
 
       // Distribute items into columns by filling shortest column first
@@ -929,6 +1029,11 @@
             onCancel={id => setModal({ type: 'cancel', marketId: id })}
             onRollback={rollbackMarket}
             onToggleFavorite={toggleFavorite}
+            onLineSelectionClick={handleLineSelectionClick}
+            onStopLineSettlement={stopLineSettlement}
+            onCancelLine={cancelLine}
+            onRollbackLine={rollbackLine}
+            lineSettlingMap={lineSettlingMap}
           />
         );
       };
@@ -1075,6 +1180,88 @@
         setToast({ message: 'Settlement rolled back', type: 'info' });
       }, []);
 
+      // === Line-based settlement (for merged markets like Total Goals) ===
+      // lineSettlingMap: { [lineId]: { selectionId, countdown, intervalId } }
+      const [lineSettlingMap, setLineSettlingMap] = useState({});
+      const lineSettlingMapRef = useRef(lineSettlingMap);
+      lineSettlingMapRef.current = lineSettlingMap;
+
+      const startLineSettlement = useCallback((marketId, lineId, selectionId) => {
+        if (lineSettlingMapRef.current[lineId]) return;
+        // Mark line as settling
+        setMarkets(prev => prev.map(m => {
+          if (m.id !== marketId || !m.lines) return m;
+          return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'settling' } : l) };
+        }));
+        let remaining = COUNTDOWN_SECONDS;
+        const entry = { selectionId, countdown: remaining, intervalId: null };
+        entry.intervalId = setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            clearInterval(entry.intervalId);
+            setLineSettlingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; });
+            setMarkets(prev => prev.map(m => {
+              if (m.id !== marketId || !m.lines) return m;
+              return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'settled', settled: selectionId } : l) };
+            }));
+            setToast({ message: 'Line settled', type: 'success' });
+          } else {
+            setLineSettlingMap(prev => ({ ...prev, [lineId]: { ...prev[lineId], countdown: remaining } }));
+          }
+        }, 1000);
+        setLineSettlingMap(prev => ({ ...prev, [lineId]: entry }));
+      }, []);
+
+      const stopLineSettlement = useCallback((marketId, lineId) => {
+        const entry = lineSettlingMapRef.current[lineId];
+        if (entry) {
+          clearInterval(entry.intervalId);
+          setLineSettlingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; });
+          setMarkets(prev => prev.map(m => {
+            if (m.id !== marketId || !m.lines) return m;
+            return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'open' } : l) };
+          }));
+          setToast({ message: 'Settlement stopped', type: 'warning' });
+        }
+      }, []);
+
+      const handleLineSelectionClick = useCallback((marketId, lineId, selectionId) => {
+        const market = markets.find(m => m.id === marketId);
+        if (!market || !market.lines) return;
+        const line = market.lines.find(l => l.id === lineId);
+        if (!line) return;
+        if (line.status === 'settling') {
+          const current = lineSettlingMapRef.current[lineId];
+          if (current && current.selectionId === selectionId) {
+            stopLineSettlement(marketId, lineId);
+          } else {
+            stopLineSettlement(marketId, lineId);
+            setTimeout(() => startLineSettlement(marketId, lineId, selectionId), 50);
+          }
+          return;
+        }
+        if (line.status !== 'open') return;
+        startLineSettlement(marketId, lineId, selectionId);
+      }, [markets, startLineSettlement, stopLineSettlement]);
+
+      const cancelLine = useCallback((marketId, lineId) => {
+        const entry = lineSettlingMapRef.current[lineId];
+        if (entry) { clearInterval(entry.intervalId); setLineSettlingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; }); }
+        setMarkets(prev => prev.map(m => {
+          if (m.id !== marketId || !m.lines) return m;
+          return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'void', settled: null } : l) };
+        }));
+        setToast({ message: 'Line voided', type: 'error' });
+      }, []);
+
+      const rollbackLine = useCallback((marketId, lineId) => {
+        setMarkets(prev => prev.map(m => {
+          if (m.id !== marketId || !m.lines) return m;
+          return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'open', settled: null } : l) };
+        }));
+        setToast({ message: 'Line rolled back', type: 'info' });
+      }, []);
+
       const toggleFavorite = useCallback(marketId => {
         setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, favorite: !m.favorite } : m));
       }, []);
@@ -1106,7 +1293,10 @@
 
       // Cleanup intervals on unmount
       useEffect(() => {
-        return () => { Object.values(settlingMapRef.current).forEach(e => clearInterval(e.intervalId)); };
+        return () => {
+          Object.values(settlingMapRef.current).forEach(e => clearInterval(e.intervalId));
+          Object.values(lineSettlingMapRef.current).forEach(e => clearInterval(e.intervalId));
+        };
       }, []);
 
       // Filtering
@@ -1177,6 +1367,11 @@
                 setModal={setModal}
                 rollbackMarket={rollbackMarket}
                 toggleFavorite={toggleFavorite}
+                handleLineSelectionClick={handleLineSelectionClick}
+                stopLineSettlement={stopLineSettlement}
+                cancelLine={cancelLine}
+                rollbackLine={rollbackLine}
+                lineSettlingMap={lineSettlingMap}
               />
             </div>
           </div>
