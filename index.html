@@ -272,14 +272,17 @@
     }
     .market-search__input::placeholder { color: var(--text-muted); }
 
-    /* Market List - multi-column masonry */
+    /* Market List - 3 column grid, fill columns sequentially */
     .market-list {
       flex: 1; overflow-y: auto; padding: 10px 12px;
-      columns: 3 320px; column-gap: 8px;
+      display: flex; gap: 8px;
+    }
+    .market-col {
+      flex: 1; min-width: 0;
     }
 
     /* Market Group */
-    .market-group { break-inside: avoid; margin-bottom: 6px; }
+    .market-group { margin-bottom: 6px; }
     .market-group__header {
       display: flex; align-items: center; gap: 6px;
       padding: 4px 0; margin-bottom: 4px;
@@ -299,7 +302,6 @@
       margin-bottom: 4px;
       overflow: hidden;
       transition: border-color 0.12s;
-      break-inside: avoid;
     }
     .mkt:hover { border-color: var(--border-primary); }
     .mkt--open { border-left: 3px solid var(--blue); }
@@ -856,6 +858,88 @@
       return <div className={`toast toast--${type}`}>{type === 'success' ? '\u2713' : type === 'warning' ? '\u26A0' : type === 'error' ? '\u2717' : '\u2139'} {message}</div>;
     }
 
+    // Market columns: fill left-to-right sequentially (no balancing)
+    const NUM_COLS = 3;
+
+    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket }) {
+      // Flatten all renderable items: group headers + market cards
+      const items = [];
+      Object.entries(groupedMarkets).forEach(([groupKey, gm]) => {
+        if (activeTab === 'all') {
+          items.push({ type: 'group-header', groupKey, count: gm.length });
+        }
+        gm.forEach(m => items.push({ type: 'market', market: m }));
+      });
+
+      // Estimate height per item to distribute evenly across columns
+      // Group header ~24px, market ~(28 + selections_rows * 28)px
+      function estimateHeight(item) {
+        if (item.type === 'group-header') return 28;
+        const n = item.market.selections.length;
+        // selections are flex-wrap pills, roughly 5-6 per row in a column
+        const selRows = Math.ceil(n / 5);
+        const base = 32; // header
+        const sels = selRows * 28;
+        const settling = item.market.status === 'settling' ? 30 : 0;
+        return base + sels + settling + 6; // margin
+      }
+
+      // Distribute items into columns by filling shortest column first
+      const cols = Array.from({ length: NUM_COLS }, () => ({ items: [], height: 0 }));
+      items.forEach(item => {
+        const h = estimateHeight(item);
+        // Find shortest column
+        let minIdx = 0;
+        for (let i = 1; i < NUM_COLS; i++) {
+          if (cols[i].height < cols[minIdx].height) minIdx = i;
+        }
+        cols[minIdx].items.push(item);
+        cols[minIdx].height += h;
+      });
+
+      const renderItem = (item, i) => {
+        if (item.type === 'group-header') {
+          return (
+            <div className="market-group__header" key={`gh-${item.groupKey}`}>
+              <span className="market-group__title">{MARKET_GROUPS[item.groupKey]?.name || item.groupKey}</span>
+              <span className="market-group__line"></span>
+              <span className="market-group__count">{item.count}</span>
+            </div>
+          );
+        }
+        const m = item.market;
+        return (
+          <MarketCard
+            key={m.id}
+            market={m}
+            settlingState={settlingMap[m.id]}
+            onSelectionClick={selId => handleSelectionClick(m.id, selId)}
+            onStopSettlement={stopSettlement}
+            onCancel={id => setModal({ type: 'cancel', marketId: id })}
+            onRollback={rollbackMarket}
+          />
+        );
+      };
+
+      if (filteredMarkets.length === 0) {
+        return (
+          <div className="market-list">
+            <div style={{textAlign:'center',padding:40,color:'var(--text-muted)',flex:1}}>No markets found</div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="market-list">
+          {cols.map((col, ci) => (
+            <div className="market-col" key={ci}>
+              {col.items.map(renderItem)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     // ===== MAIN APP =====
     function App() {
       const [markets, setMarkets] = useState(initialMarkets);
@@ -1065,33 +1149,16 @@
                   <span><span className="market-tabs__dot" style={{background:'var(--void)'}}></span>{statusCounts.void}</span>
                 </div>
               </div>
-              <div className="market-list">
-                {Object.entries(groupedMarkets).map(([groupKey, gm]) => (
-                  <div className="market-group" key={groupKey}>
-                    {activeTab === 'all' && (
-                      <div className="market-group__header">
-                        <span className="market-group__title">{MARKET_GROUPS[groupKey]?.name || groupKey}</span>
-                        <span className="market-group__line"></span>
-                        <span className="market-group__count">{gm.length}</span>
-                      </div>
-                    )}
-                    {gm.map(m => (
-                      <MarketCard
-                        key={m.id}
-                        market={m}
-                        settlingState={settlingMap[m.id]}
-                        onSelectionClick={selId => handleSelectionClick(m.id, selId)}
-                        onStopSettlement={stopSettlement}
-                        onCancel={id => setModal({ type: 'cancel', marketId: id })}
-                        onRollback={rollbackMarket}
-                      />
-                    ))}
-                  </div>
-                ))}
-                {filteredMarkets.length === 0 && (
-                  <div style={{textAlign:'center',padding:40,color:'var(--text-muted)'}}>No markets found</div>
-                )}
-              </div>
+              <MarketColumns
+                groupedMarkets={groupedMarkets}
+                activeTab={activeTab}
+                filteredMarkets={filteredMarkets}
+                settlingMap={settlingMap}
+                handleSelectionClick={handleSelectionClick}
+                stopSettlement={stopSettlement}
+                setModal={setModal}
+                rollbackMarket={rollbackMarket}
+              />
             </div>
           </div>
 
