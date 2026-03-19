@@ -386,34 +386,35 @@
       transition: none;
     }
 
-    /* Lines layout (for merged markets like Total Goals) */
-    .mkt__lines { padding: 0 8px 6px; }
-    .mkt-line {
-      display: flex; align-items: center; gap: 4px;
-      padding: 3px 0;
-      border-bottom: 1px solid var(--border-subtle);
+    /* Lines layout: [Sel1] specifier [Sel2] - button style */
+    .mkt__lines {
+      display: grid; gap: 3px;
+      padding: 0 8px 6px;
     }
-    .mkt-line:last-child { border-bottom: none; }
+    .mkt-line {
+      display: flex; align-items: stretch; gap: 3px;
+    }
+    .mkt-line__sel { flex: 1; min-width: 0; }
+    .mkt-line__sel .sel { width: 100%; }
     .mkt-line__spec {
       font-family: var(--font-mono); font-size: 11px; font-weight: 700;
-      color: var(--text-secondary); min-width: 30px; text-align: center;
+      color: var(--text-secondary); min-width: 38px; text-align: center;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      background: var(--bg-input); border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle); padding: 0 4px;
     }
-    .mkt-line__sels {
-      display: flex; gap: 3px; flex: 1;
-    }
-    .mkt-line__sels .sel { flex: 1; }
-    .mkt-line__spacer { flex: 1; }
     .mkt-line__badge {
       font-size: 7px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.3px; padding: 1px 5px; border-radius: 6px; flex-shrink: 0;
+      display: flex; align-items: center;
     }
     .mkt-line__badge--settled { background: var(--settled-bg); color: var(--settled); border: 1px solid var(--settled-border); }
     .mkt-line__badge--void { background: var(--void-bg); color: var(--void); border: 1px solid var(--void-border); }
     .mkt-line__actions {
-      display: flex; gap: 3px; margin-left: 4px; flex-shrink: 0;
+      display: flex; gap: 3px; flex-shrink: 0; align-items: center;
     }
-    .mkt-line--settled { opacity: 0.7; }
-    .mkt-line--settling .mkt-line__spec { color: var(--orange); }
+    .mkt-line--settled { opacity: 0.6; }
+    .mkt-line--settling .mkt-line__spec { color: var(--orange); background: var(--orange-bg); border-color: var(--orange-border); font-weight: 800; }
 
     /* Market actions - inline compact */
     .mkt__actions {
@@ -957,22 +958,35 @@
                 const ls = lineSettlingMap?.[line.id];
                 const lineCountdownPct = ls ? (ls.countdown / COUNTDOWN_SECONDS) * 100 : 0;
                 const lineIsSettling = line.status === 'settling';
+                const sels = line.selections;
                 return (
                   <div key={line.id} className={`mkt-line ${line.status === 'settled' ? 'mkt-line--settled' : ''} ${lineIsSettling ? 'mkt-line--settling' : ''}`}>
-                    <span className="mkt-line__spec">{line.specifier}</span>
-                    <div className="mkt-line__sels">
-                      {line.selections.map(s => (
-                        <SelectionBtn
-                          key={s.id} s={s}
-                          marketStatus={line.status}
-                          marketSettled={line.settled}
-                          settlingSelId={ls?.selectionId}
-                          countdownPct={lineCountdownPct}
-                          onClick={selId => onLineSelectionClick(market.id, line.id, selId)}
-                        />
-                      ))}
-                    </div>
-                    <div className="mkt-line__spacer"></div>
+                    {sels.length === 2 ? (
+                      <>
+                        <div className="mkt-line__sel">
+                          <SelectionBtn s={sels[0]} marketStatus={line.status} marketSettled={line.settled}
+                            settlingSelId={ls?.selectionId} countdownPct={lineCountdownPct}
+                            onClick={selId => onLineSelectionClick(market.id, line.id, selId)} />
+                        </div>
+                        <span className="mkt-line__spec">{line.specifier}</span>
+                        <div className="mkt-line__sel">
+                          <SelectionBtn s={sels[1]} marketStatus={line.status} marketSettled={line.settled}
+                            settlingSelId={ls?.selectionId} countdownPct={lineCountdownPct}
+                            onClick={selId => onLineSelectionClick(market.id, line.id, selId)} />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="mkt-line__spec">{line.specifier}</span>
+                        {sels.map(s => (
+                          <div className="mkt-line__sel" key={s.id}>
+                            <SelectionBtn s={s} marketStatus={line.status} marketSettled={line.settled}
+                              settlingSelId={ls?.selectionId} countdownPct={lineCountdownPct}
+                              onClick={selId => onLineSelectionClick(market.id, line.id, selId)} />
+                          </div>
+                        ))}
+                      </>
+                    )}
                     {line.status === 'settled' && (
                       <>
                         <span className="mkt-line__badge mkt-line__badge--settled">settled</span>
