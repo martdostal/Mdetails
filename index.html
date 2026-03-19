@@ -314,6 +314,13 @@
       display: flex; align-items: center; gap: 6px;
       padding: 5px 8px; user-select: none;
     }
+    .mkt__star {
+      background: none; border: none; cursor: pointer; font-size: 12px;
+      color: var(--text-muted); padding: 0; line-height: 1;
+      transition: all 0.1s; flex-shrink: 0;
+    }
+    .mkt__star:hover { color: var(--orange); transform: scale(1.15); }
+    .mkt__star--active { color: var(--orange); }
     .mkt__name {
       font-size: 11px; font-weight: 600; min-width: 0;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -483,113 +490,113 @@
     // Markets with selections (no odds/liability - this is settlement view)
     const initialMarkets = [
       // MAIN
-      { id: 'match-winner', name: 'Match Winner', group: 'main', status: 'open', settled: null, selections: [
+      { id: 'match-winner', name: 'Match Winner', group: 'main', status: 'open', favorite: false, settled: null, selections: [
         sel('mw-1', 'Manchester United'), sel('mw-x', 'Draw'), sel('mw-2', 'Liverpool')] },
-      { id: 'double-chance', name: 'Double Chance', group: 'main', status: 'open', settled: null, selections: [
+      { id: 'double-chance', name: 'Double Chance', group: 'main', status: 'open', favorite: false, settled: null, selections: [
         sel('dc-1x', '1X'), sel('dc-12', '12'), sel('dc-x2', 'X2')] },
-      { id: 'draw-no-bet', name: 'Draw No Bet', group: 'main', status: 'open', settled: null, selections: [
+      { id: 'draw-no-bet', name: 'Draw No Bet', group: 'main', status: 'open', favorite: false, settled: null, selections: [
         sel('dnb-1', 'Manchester United'), sel('dnb-2', 'Liverpool')] },
 
       // GOALS
-      { id: 'total-goals-1.5', name: 'Total Goals', specifier: '1.5', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'total-goals-1.5', name: 'Total Goals', specifier: '1.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('tg15-o', 'Over 1.5'), sel('tg15-u', 'Under 1.5')] },
-      { id: 'total-goals-2.5', name: 'Total Goals', specifier: '2.5', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'total-goals-2.5', name: 'Total Goals', specifier: '2.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('tg25-o', 'Over 2.5'), sel('tg25-u', 'Under 2.5')] },
-      { id: 'total-goals-3.5', name: 'Total Goals', specifier: '3.5', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'total-goals-3.5', name: 'Total Goals', specifier: '3.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('tg35-o', 'Over 3.5'), sel('tg35-u', 'Under 3.5')] },
-      { id: 'total-goals-4.5', name: 'Total Goals', specifier: '4.5', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'total-goals-4.5', name: 'Total Goals', specifier: '4.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('tg45-o', 'Over 4.5'), sel('tg45-u', 'Under 4.5')] },
-      { id: 'btts', name: 'Both Teams To Score', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'btts', name: 'Both Teams To Score', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('btts-y', 'Yes'), sel('btts-n', 'No')] },
-      { id: 'btts-ht', name: 'BTTS 1st Half', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'btts-ht', name: 'BTTS 1st Half', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('bttsht-y', 'Yes'), sel('bttsht-n', 'No')] },
-      { id: 'exact-goals', name: 'Exact Goals', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'exact-goals', name: 'Exact Goals', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('eg-0', '0'), sel('eg-1', '1'), sel('eg-2', '2'), sel('eg-3', '3'), sel('eg-4', '4'), sel('eg-5+', '5+')] },
-      { id: 'first-goal', name: 'First Goal', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'first-goal', name: 'First Goal', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('fg-1', 'Man Utd'), sel('fg-2', 'Liverpool'), sel('fg-none', 'No Goal')] },
-      { id: 'home-total-goals-1.5', name: 'Home Total Goals', specifier: '1.5', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'home-total-goals-1.5', name: 'Home Total Goals', specifier: '1.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('htg15-o', 'Over 1.5'), sel('htg15-u', 'Under 1.5')] },
-      { id: 'away-total-goals-1.5', name: 'Away Total Goals', specifier: '1.5', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'away-total-goals-1.5', name: 'Away Total Goals', specifier: '1.5', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('atg15-o', 'Over 1.5'), sel('atg15-u', 'Under 1.5')] },
-      { id: 'odd-even-goals', name: 'Odd/Even Goals', group: 'goals', status: 'open', settled: null, selections: [
+      { id: 'odd-even-goals', name: 'Odd/Even Goals', group: 'goals', status: 'open', favorite: false, settled: null, selections: [
         sel('oe-odd', 'Odd'), sel('oe-even', 'Even')] },
 
       // HALVES
-      { id: 'ht-result', name: 'Half Time Result', group: 'halves', status: 'settled', settled: 'ht-x', selections: [
+      { id: 'ht-result', name: 'Half Time Result', group: 'halves', status: 'settled', favorite: false, settled: 'ht-x', selections: [
         sel('ht-1', 'Manchester United'), sel('ht-x', 'Draw'), sel('ht-2', 'Liverpool')] },
-      { id: 'ht-ft', name: 'HT / FT', group: 'halves', status: 'open', settled: null, selections: [
+      { id: 'ht-ft', name: 'HT / FT', group: 'halves', status: 'open', favorite: false, settled: null, selections: [
         sel('htft-11', '1/1'), sel('htft-1x', '1/X'), sel('htft-12', '1/2'),
         sel('htft-x1', 'X/1'), sel('htft-xx', 'X/X'), sel('htft-x2', 'X/2'),
         sel('htft-21', '2/1'), sel('htft-2x', '2/X'), sel('htft-22', '2/2')] },
-      { id: 'ht-total-goals-0.5', name: 'HT Total Goals', specifier: '0.5', group: 'halves', status: 'settled', settled: 'httg05-o', selections: [
+      { id: 'ht-total-goals-0.5', name: 'HT Total Goals', specifier: '0.5', group: 'halves', status: 'settled', favorite: false, settled: 'httg05-o', selections: [
         sel('httg05-o', 'Over 0.5'), sel('httg05-u', 'Under 0.5')] },
-      { id: 'ht-total-goals-1.5', name: 'HT Total Goals', specifier: '1.5', group: 'halves', status: 'settled', settled: 'httg15-u', selections: [
+      { id: 'ht-total-goals-1.5', name: 'HT Total Goals', specifier: '1.5', group: 'halves', status: 'settled', favorite: false, settled: 'httg15-u', selections: [
         sel('httg15-o', 'Over 1.5'), sel('httg15-u', 'Under 1.5')] },
-      { id: 'ht-double-chance', name: 'HT Double Chance', group: 'halves', status: 'settled', settled: 'htdc-1x', selections: [
+      { id: 'ht-double-chance', name: 'HT Double Chance', group: 'halves', status: 'settled', favorite: false, settled: 'htdc-1x', selections: [
         sel('htdc-1x', '1X'), sel('htdc-12', '12'), sel('htdc-x2', 'X2')] },
-      { id: 'highest-scoring-half', name: 'Highest Scoring Half', group: 'halves', status: 'open', settled: null, selections: [
+      { id: 'highest-scoring-half', name: 'Highest Scoring Half', group: 'halves', status: 'open', favorite: false, settled: null, selections: [
         sel('hsh-1', '1st Half'), sel('hsh-2', '2nd Half'), sel('hsh-eq', 'Equal')] },
-      { id: '2h-result', name: '2nd Half Result', group: 'halves', status: 'open', settled: null, selections: [
+      { id: '2h-result', name: '2nd Half Result', group: 'halves', status: 'open', favorite: false, settled: null, selections: [
         sel('2h-1', 'Man Utd'), sel('2h-x', 'Draw'), sel('2h-2', 'Liverpool')] },
 
       // CORNERS
-      { id: 'total-corners', name: 'Total Corners', specifier: '9.5', group: 'corners', status: 'open', settled: null, selections: [
+      { id: 'total-corners', name: 'Total Corners', specifier: '9.5', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
         sel('tc-o', 'Over 9.5'), sel('tc-u', 'Under 9.5')] },
-      { id: 'corner-handicap', name: 'Corner Handicap', specifier: '-1.5', group: 'corners', status: 'open', settled: null, selections: [
+      { id: 'corner-handicap', name: 'Corner Handicap', specifier: '-1.5', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
         sel('ch-1', 'Man Utd -1.5'), sel('ch-2', 'Liverpool +1.5')] },
-      { id: 'first-corner', name: 'First Corner', group: 'corners', status: 'open', settled: null, selections: [
+      { id: 'first-corner', name: 'First Corner', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
         sel('fc-1', 'Man Utd'), sel('fc-2', 'Liverpool')] },
-      { id: 'corner-race', name: 'Corner Race To', specifier: '5', group: 'corners', status: 'open', settled: null, selections: [
+      { id: 'corner-race', name: 'Corner Race To', specifier: '5', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
         sel('cr-1', 'Man Utd'), sel('cr-2', 'Liverpool'), sel('cr-none', 'Neither')] },
 
       // CARDS
-      { id: 'total-cards', name: 'Total Cards', specifier: '3.5', group: 'cards', status: 'open', settled: null, selections: [
+      { id: 'total-cards', name: 'Total Cards', specifier: '3.5', group: 'cards', status: 'open', favorite: false, settled: null, selections: [
         sel('tcard-o', 'Over 3.5'), sel('tcard-u', 'Under 3.5')] },
-      { id: 'first-card', name: 'First Card', group: 'cards', status: 'open', settled: null, selections: [
+      { id: 'first-card', name: 'First Card', group: 'cards', status: 'open', favorite: false, settled: null, selections: [
         sel('fcard-1', 'Man Utd'), sel('fcard-2', 'Liverpool')] },
-      { id: 'player-card', name: 'Player To Be Carded', group: 'cards', status: 'open', settled: null, selections: [
+      { id: 'player-card', name: 'Player To Be Carded', group: 'cards', status: 'open', favorite: false, settled: null, selections: [
         sel('pc-cas', 'Casemiro'), sel('pc-mac', 'Mac Allister'), sel('pc-bru', 'Bruno'),
         sel('pc-szo', 'Szoboszlai'), sel('pc-dal', 'Dalot'), sel('pc-rob', 'Robertson')] },
 
       // HANDICAP
-      { id: 'asian-handicap', name: 'Asian Handicap', specifier: '-0.5', group: 'handicap', status: 'open', settled: null, selections: [
+      { id: 'asian-handicap', name: 'Asian Handicap', specifier: '-0.5', group: 'handicap', status: 'open', favorite: false, settled: null, selections: [
         sel('ah-1', 'Man Utd -0.5'), sel('ah-2', 'Liverpool +0.5')] },
-      { id: 'asian-handicap-1.5', name: 'Asian Handicap', specifier: '-1.5', group: 'handicap', status: 'open', settled: null, selections: [
+      { id: 'asian-handicap-1.5', name: 'Asian Handicap', specifier: '-1.5', group: 'handicap', status: 'open', favorite: false, settled: null, selections: [
         sel('ah15-1', 'Man Utd -1.5'), sel('ah15-2', 'Liverpool +1.5')] },
-      { id: 'european-handicap', name: 'European Handicap', specifier: '0:1', group: 'handicap', status: 'open', settled: null, selections: [
+      { id: 'european-handicap', name: 'European Handicap', specifier: '0:1', group: 'handicap', status: 'open', favorite: false, settled: null, selections: [
         sel('eh-1', 'Man Utd'), sel('eh-x', 'Draw'), sel('eh-2', 'Liverpool')] },
 
       // SPECIALS
-      { id: 'penalty-awarded', name: 'Penalty Awarded', group: 'specials', status: 'open', settled: null, selections: [
+      { id: 'penalty-awarded', name: 'Penalty Awarded', group: 'specials', status: 'open', favorite: false, settled: null, selections: [
         sel('pen-y', 'Yes'), sel('pen-n', 'No')] },
-      { id: 'clean-sheet-home', name: 'Home Clean Sheet', group: 'specials', status: 'open', settled: null, selections: [
+      { id: 'clean-sheet-home', name: 'Home Clean Sheet', group: 'specials', status: 'open', favorite: false, settled: null, selections: [
         sel('csh-y', 'Yes'), sel('csh-n', 'No')] },
-      { id: 'clean-sheet-away', name: 'Away Clean Sheet', group: 'specials', status: 'open', settled: null, selections: [
+      { id: 'clean-sheet-away', name: 'Away Clean Sheet', group: 'specials', status: 'open', favorite: false, settled: null, selections: [
         sel('csa-y', 'Yes'), sel('csa-n', 'No')] },
-      { id: 'red-card', name: 'Red Card In Match', group: 'specials', status: 'open', settled: null, selections: [
+      { id: 'red-card', name: 'Red Card In Match', group: 'specials', status: 'open', favorite: false, settled: null, selections: [
         sel('rc-y', 'Yes'), sel('rc-n', 'No')] },
-      { id: 'var-decision', name: 'VAR Decision', group: 'specials', status: 'open', settled: null, selections: [
+      { id: 'var-decision', name: 'VAR Decision', group: 'specials', status: 'open', favorite: false, settled: null, selections: [
         sel('var-y', 'Yes'), sel('var-n', 'No')] },
 
       // CORRECT SCORE
-      { id: 'correct-score', name: 'Correct Score', group: 'correct_score', status: 'open', settled: null, selections: [
+      { id: 'correct-score', name: 'Correct Score', group: 'correct_score', status: 'open', favorite: false, settled: null, selections: [
         sel('cs-10', '1-0'), sel('cs-20', '2-0'), sel('cs-21', '2-1'),
         sel('cs-00', '0-0'), sel('cs-11', '1-1'), sel('cs-22', '2-2'),
         sel('cs-01', '0-1'), sel('cs-02', '0-2'), sel('cs-12', '1-2'),
         sel('cs-30', '3-0'), sel('cs-31', '3-1'), sel('cs-32', '3-2'), sel('cs-oth', 'Other')] },
-      { id: 'correct-score-ht', name: 'HT Correct Score', group: 'correct_score', status: 'settled', settled: 'csht-11', selections: [
+      { id: 'correct-score-ht', name: 'HT Correct Score', group: 'correct_score', status: 'settled', favorite: false, settled: 'csht-11', selections: [
         sel('csht-00', '0-0'), sel('csht-10', '1-0'), sel('csht-01', '0-1'),
         sel('csht-11', '1-1'), sel('csht-20', '2-0'), sel('csht-02', '0-2')] },
 
       // PLAYER
-      { id: 'anytime-scorer', name: 'Anytime Goalscorer', group: 'player', status: 'open', settled: null, selections: [
+      { id: 'anytime-scorer', name: 'Anytime Goalscorer', group: 'player', status: 'open', favorite: false, settled: null, selections: [
         sel('as-ras', 'Rashford'), sel('as-hoj', 'Hojlund'), sel('as-bru', 'Bruno'),
         sel('as-gar', 'Garnacho'), sel('as-sal', 'Salah'), sel('as-nun', 'Nunez'),
         sel('as-jot', 'Jota'), sel('as-dia', 'Diaz')] },
-      { id: 'first-scorer', name: 'First Goalscorer', group: 'player', status: 'open', settled: null, selections: [
+      { id: 'first-scorer', name: 'First Goalscorer', group: 'player', status: 'open', favorite: false, settled: null, selections: [
         sel('fs-ras', 'Rashford'), sel('fs-hoj', 'Hojlund'), sel('fs-bru', 'Bruno'),
         sel('fs-sal', 'Salah'), sel('fs-nun', 'Nunez'), sel('fs-jot', 'Jota'), sel('fs-none', 'No Goal')] },
-      { id: 'player-shots', name: 'Player Shots OT', specifier: '1.5+', group: 'player', status: 'open', settled: null, selections: [
+      { id: 'player-shots', name: 'Player Shots OT', specifier: '1.5+', group: 'player', status: 'open', favorite: false, settled: null, selections: [
         sel('ps-sal', 'Salah'), sel('ps-bru', 'Bruno'), sel('ps-ras', 'Rashford'), sel('ps-nun', 'Nunez')] },
     ];
 
@@ -746,7 +753,7 @@
     }
 
     // Market Card
-    function MarketCard({ market, settlingState, onSelectionClick, onStopSettlement, onCancel, onRollback }) {
+    function MarketCard({ market, settlingState, onSelectionClick, onStopSettlement, onCancel, onRollback, onToggleFavorite }) {
       const isSettling = market.status === 'settling';
       const countdown = settlingState?.countdown;
       const countdownPct = settlingState ? (settlingState.countdown / COUNTDOWN_SECONDS) * 100 : 0;
@@ -756,6 +763,10 @@
       return (
         <div className={`mkt mkt--${market.status}`}>
           <div className="mkt__header">
+            <button className={`mkt__star ${market.favorite ? 'mkt__star--active' : ''}`}
+              onClick={() => onToggleFavorite(market.id)}>
+              {market.favorite ? '\u2605' : '\u2606'}
+            </button>
             <span className="mkt__name">
               {market.name}
               {market.specifier && <span className="mkt__specifier">{market.specifier}</span>}
@@ -861,7 +872,7 @@
     // Market columns: fill left-to-right sequentially (no balancing)
     const NUM_COLS = 3;
 
-    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket }) {
+    function MarketColumns({ groupedMarkets, activeTab, filteredMarkets, settlingMap, handleSelectionClick, stopSettlement, setModal, rollbackMarket, toggleFavorite }) {
       // Flatten all renderable items: group headers + market cards
       const items = [];
       Object.entries(groupedMarkets).forEach(([groupKey, gm]) => {
@@ -917,6 +928,7 @@
             onStopSettlement={stopSettlement}
             onCancel={id => setModal({ type: 'cancel', marketId: id })}
             onRollback={rollbackMarket}
+            onToggleFavorite={toggleFavorite}
           />
         );
       };
@@ -994,7 +1006,7 @@
               delete next[marketId];
               return next;
             });
-            setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'settled', settled: selectionId } : m));
+            setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'settled', favorite: false, settled: selectionId } : m));
             setToast({ message: 'Market settled', type: 'success' });
           } else {
             setSettlingMap(prev => ({
@@ -1063,6 +1075,10 @@
         setToast({ message: 'Settlement rolled back', type: 'info' });
       }, []);
 
+      const toggleFavorite = useCallback(marketId => {
+        setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, favorite: !m.favorite } : m));
+      }, []);
+
       const handlePartAction = useCallback(action => {
         setToast({ message: `Action: ${action}`, type: 'info' });
       }, []);
@@ -1095,12 +1111,14 @@
 
       // Filtering
       const filteredMarkets = useMemo(() => {
-        let list = markets;
+        let list = [...markets];
         if (activeTab !== 'all') list = list.filter(m => m.group === activeTab);
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           list = list.filter(m => m.name.toLowerCase().includes(q) || (m.specifier && m.specifier.includes(q)));
         }
+        // Favorites first, preserve order within each group
+        list.sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
         return list;
       }, [markets, activeTab, searchQuery]);
 
@@ -1158,6 +1176,7 @@
                 stopSettlement={stopSettlement}
                 setModal={setModal}
                 rollbackMarket={rollbackMarket}
+                toggleFavorite={toggleFavorite}
               />
             </div>
           </div>
