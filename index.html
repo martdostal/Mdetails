@@ -995,11 +995,22 @@
         return base + sels + settling + 6;
       }
 
-      // Distribute items into columns by filling shortest column first
+      // Split favorites (always column 1 first) from rest
+      const favItems = items.filter(i => i.type === 'market' && i.market.favorite);
+      const restItems = items.filter(i => !(i.type === 'market' && i.market.favorite));
+
       const cols = Array.from({ length: NUM_COLS }, () => ({ items: [], height: 0 }));
-      items.forEach(item => {
+
+      // Favorites go to column 1 first
+      favItems.forEach(item => {
         const h = estimateHeight(item);
-        // Find shortest column
+        cols[0].items.push(item);
+        cols[0].height += h;
+      });
+
+      // Rest fills shortest column first
+      restItems.forEach(item => {
+        const h = estimateHeight(item);
         let minIdx = 0;
         for (let i = 1; i < NUM_COLS; i++) {
           if (cols[i].height < cols[minIdx].height) minIdx = i;
