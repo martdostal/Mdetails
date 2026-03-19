@@ -345,9 +345,12 @@
 
     /* Selections inline within market */
     .mkt__sels {
-      display: flex; flex-wrap: wrap; gap: 3px;
+      display: grid; gap: 3px;
       padding: 0 8px 6px;
     }
+    .mkt__sels--2 { grid-template-columns: 1fr 1fr; }
+    .mkt__sels--3 { grid-template-columns: 1fr 1fr 1fr; }
+    .mkt__sels--many { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
 
     .sel {
       display: flex; align-items: center; justify-content: center;
@@ -396,12 +399,13 @@
       color: var(--text-secondary); min-width: 30px; text-align: center;
     }
     .mkt-line__sels {
-      display: flex; gap: 3px; flex: 1;
+      display: flex; gap: 3px;
     }
+    .mkt-line__sels .sel { min-width: 52px; }
+    .mkt-line__spacer { flex: 1; }
     .mkt-line__badge {
       font-size: 7px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.3px; padding: 1px 5px; border-radius: 6px; flex-shrink: 0;
-      margin-left: auto;
     }
     .mkt-line__badge--settled { background: var(--settled-bg); color: var(--settled); border: 1px solid var(--settled-border); }
     .mkt-line__badge--void { background: var(--void-bg); color: var(--void); border: 1px solid var(--void-border); }
@@ -847,6 +851,7 @@
                         />
                       ))}
                     </div>
+                    <div className="mkt-line__spacer"></div>
                     {line.status === 'settled' && (
                       <>
                         <span className="mkt-line__badge mkt-line__badge--settled">settled</span>
@@ -875,7 +880,7 @@
             </div>
           ) : (
             <>
-              <div className="mkt__sels">
+              <div className={`mkt__sels ${market.selections.length === 2 ? 'mkt__sels--2' : market.selections.length === 3 ? 'mkt__sels--3' : 'mkt__sels--many'}`}>
                 {market.selections.map(s => (
                   <SelectionBtn
                     key={s.id} s={s}
