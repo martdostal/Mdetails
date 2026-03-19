@@ -725,7 +725,7 @@
       const isVoid = marketStatus === 'void';
       const isSettling = marketStatus === 'settling' && settlingSelId === s.id;
       const isWinner = isSettled && marketSettled === s.id;
-      const isDisabled = (marketStatus === 'settling' && settlingSelId !== s.id) || (isSettled && !isWinner) || marketStatus === 'bet-closed';
+      const isDisabled = (marketStatus === 'settling' && settlingSelId !== s.id) || (isSettled && !isWinner);
 
       let cls = 'sel';
       if (isWinner) cls += ' sel--winner';
@@ -734,8 +734,8 @@
       else if (isDisabled) cls += ' sel--disabled';
 
       return (
-        <div className={cls} onClick={(!isSettled && !isVoid && marketStatus !== 'bet-closed') ? () => onClick(s.id) : undefined}
-          style={{ cursor: (isSettled || isVoid || marketStatus === 'bet-closed') ? 'default' : 'pointer' }}>
+        <div className={cls} onClick={(!isSettled && !isVoid) ? () => onClick(s.id) : undefined}
+          style={{ cursor: (isSettled || isVoid) ? 'default' : 'pointer' }}>
           <span className="sel__name">{s.name}</span>
           {isWinner && <span className="sel__winner-icon">\u2713</span>}
           {isSettling && <div className="sel__countdown" style={{ width: `${countdownPct}%` }}></div>}
@@ -748,7 +748,7 @@
       const isSettling = market.status === 'settling';
       const countdown = settlingState?.countdown;
       const countdownPct = settlingState ? (settlingState.countdown / COUNTDOWN_SECONDS) * 100 : 0;
-      const statusLabel = market.status === 'bet-closed' ? 'bet closed' : market.status;
+      const statusLabel = market.status;
       const showActions = isSettling || market.status === 'settled' || (market.status !== 'void');
 
       return (
@@ -760,7 +760,7 @@
             </span>
             <div className="mkt__header-right">
               <span className={`mkt__badge mkt__badge--${market.status}`}>{statusLabel}</span>
-              {!isSettling && market.status !== 'void' && market.status !== 'settled' && market.status !== 'bet-closed' && (
+              {!isSettling && market.status !== 'void' && market.status !== 'settled' && (
                 <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancel(market.id)}>Cancel</button>
               )}
               {!isSettling && market.status === 'settled' && (
@@ -973,10 +973,10 @@
         setToast({ message: 'Market cancelled (void)', type: 'error' });
       }, []);
 
-      // Rollback settled -> bet-closed
+      // Rollback settled -> open (ready for re-settlement)
       const rollbackMarket = useCallback(marketId => {
-        setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'bet-closed', settled: null } : m));
-        setToast({ message: 'Rolled back to BET CLOSED', type: 'info' });
+        setMarkets(prev => prev.map(m => m.id === marketId ? { ...m, status: 'open', settled: null } : m));
+        setToast({ message: 'Settlement rolled back', type: 'info' });
       }, []);
 
       const handlePartAction = useCallback(action => {
@@ -1034,7 +1034,7 @@
       }, [markets]);
 
       const statusCounts = useMemo(() => {
-        const c = { open: 0, settling: 0, settled: 0, void: 0, 'bet-closed': 0 };
+        const c = { open: 0, settling: 0, settled: 0, void: 0 };
         markets.forEach(m => { if (c[m.status] !== undefined) c[m.status]++; });
         return c;
       }, [markets]);
