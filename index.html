@@ -970,7 +970,7 @@
               {!hasLines && !isSettling && market.status !== 'void' && market.status !== 'settled' && (
                 <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancel(market.id)}>Cancel</button>
               )}
-              {!hasLines && !isSettling && market.status === 'settled' && (
+              {!hasLines && !isSettling && (market.status === 'settled' || market.status === 'void') && (
                 <button className="mkt-btn mkt-btn--rollback" onClick={() => onRollback(market.id)}>Rollback</button>
               )}
             </div>
@@ -1030,7 +1030,12 @@
                     )}
                     {line.status === 'open' && !lineIsSettling && (
                       <div className="mkt-line__actions">
-                        <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancelLine(market.id, line.id)}>Cancel</button>
+                        <button className="mkt-btn mkt-btn--cancel" onClick={() => onCancelLine(market.id, line.id, line.specifier)}>Cancel</button>
+                      </div>
+                    )}
+                    {line.status === 'void' && (
+                      <div className="mkt-line__actions">
+                        <button className="mkt-btn mkt-btn--rollback" onClick={() => onRollbackLine(market.id, line.id)}>Rollback</button>
                       </div>
                     )}
                   </div>
@@ -1085,6 +1090,31 @@
               <button className="btn btn--danger btn--sm" style={{opacity: reason.trim() ? 1 : 0.4, cursor: reason.trim() ? 'pointer' : 'not-allowed'}}
                 onClick={() => reason.trim() && onConfirm(market.id, reason)} disabled={!reason.trim()}>
                 Cancel Market (Void)
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Cancel Line Modal (for line-based markets)
+    function CancelLineModal({ market, lineSpec, onConfirm, onClose }) {
+      const [reason, setReason] = useState('');
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal__header">
+              <div className="modal__title">Cancel: {market.name} ({lineSpec})</div>
+              <button className="modal__close" onClick={onClose}>&times;</button>
+            </div>
+            <div style={{fontSize:12,color:'var(--text-secondary)',marginBottom:4}}>All bets for this line will be void.</div>
+            <div style={{fontSize:11,color:'var(--text-muted)',marginBottom:10}}>Please provide a reason:</div>
+            <textarea className="cancel-textarea" placeholder="Reason for cancellation..." value={reason} onChange={e => setReason(e.target.value)} autoFocus />
+            <div className="modal__actions">
+              <button className="btn btn--ghost btn--sm" onClick={onClose}>Back</button>
+              <button className="btn btn--danger btn--sm" style={{opacity: reason.trim() ? 1 : 0.4, cursor: reason.trim() ? 'pointer' : 'not-allowed'}}
+                onClick={() => reason.trim() && onConfirm(reason)} disabled={!reason.trim()}>
+                Cancel Line (Void)
               </button>
             </div>
           </div>
@@ -1206,7 +1236,7 @@
             onToggleFavorite={toggleFavorite}
             onLineSelectionClick={handleLineSelectionClick}
             onStopLineSettlement={stopLineSettlement}
-            onCancelLine={cancelLine}
+            onCancelLine={(marketId, lineId, lineSpec) => setModal({ type: 'cancel-line', marketId, lineId, lineSpec })}
             onRollbackLine={rollbackLine}
             lineSettlingMap={lineSettlingMap}
           />
@@ -1419,14 +1449,15 @@
         startLineSettlement(marketId, lineId, selectionId);
       }, [markets, startLineSettlement, stopLineSettlement]);
 
-      const cancelLine = useCallback((marketId, lineId) => {
+      const cancelLine = useCallback((marketId, lineId, reason) => {
         const entry = lineSettlingMapRef.current[lineId];
         if (entry) { clearInterval(entry.intervalId); setLineSettlingMap(prev => { const n = { ...prev }; delete n[lineId]; return n; }); }
         setMarkets(prev => prev.map(m => {
           if (m.id !== marketId || !m.lines) return m;
           return { ...m, lines: m.lines.map(l => l.id === lineId ? { ...l, status: 'void', settled: null } : l) };
         }));
-        setToast({ message: 'Line voided', type: 'error' });
+        setModal(null);
+        setToast({ message: `Line voided: ${reason}`, type: 'error' });
       }, []);
 
       const rollbackLine = useCallback((marketId, lineId) => {
@@ -1554,6 +1585,14 @@
           {showGroupPopup && <GroupModal markets={markets} onGroupAction={handleGroupAction} onClose={() => setShowGroupPopup(false)} />}
           {modal?.type === 'cancel' && (
             <CancelModal market={markets.find(m => m.id === modal.marketId)} onConfirm={cancelMarket} onClose={() => setModal(null)} />
+          )}
+          {modal?.type === 'cancel-line' && (
+            <CancelLineModal
+              market={markets.find(m => m.id === modal.marketId)}
+              lineSpec={modal.lineSpec}
+              onConfirm={(reason) => cancelLine(modal.marketId, modal.lineId, reason)}
+              onClose={() => setModal(null)}
+            />
           )}
           {toast && <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />}
         </>
