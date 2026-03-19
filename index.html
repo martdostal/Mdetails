@@ -579,8 +579,13 @@
         sel('2h-1', 'Man Utd'), sel('2h-x', 'Draw'), sel('2h-2', 'Liverpool')] },
 
       // CORNERS
-      { id: 'total-corners', name: 'Total Corners', specifier: '9.5', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
-        sel('tc-o', 'Over 9.5'), sel('tc-u', 'Under 9.5')] },
+      { id: 'total-corners', name: 'Total Corners', group: 'corners', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '7.5', id: 'total-corners-7.5', status: 'open', settled: null, selections: [sel('tc75-o', 'Over'), sel('tc75-u', 'Under')] },
+        { specifier: '8.5', id: 'total-corners-8.5', status: 'open', settled: null, selections: [sel('tc85-o', 'Over'), sel('tc85-u', 'Under')] },
+        { specifier: '9.5', id: 'total-corners-9.5', status: 'open', settled: null, selections: [sel('tc95-o', 'Over'), sel('tc95-u', 'Under')] },
+        { specifier: '10.5', id: 'total-corners-10.5', status: 'open', settled: null, selections: [sel('tc105-o', 'Over'), sel('tc105-u', 'Under')] },
+        { specifier: '11.5', id: 'total-corners-11.5', status: 'open', settled: null, selections: [sel('tc115-o', 'Over'), sel('tc115-u', 'Under')] },
+      ] },
       { id: 'corner-handicap', name: 'Corner Handicap', specifier: '-1.5', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
         sel('ch-1', 'Man Utd -1.5'), sel('ch-2', 'Liverpool +1.5')] },
       { id: 'first-corner', name: 'First Corner', group: 'corners', status: 'open', favorite: false, settled: null, selections: [
@@ -589,8 +594,12 @@
         sel('cr-1', 'Man Utd'), sel('cr-2', 'Liverpool'), sel('cr-none', 'Neither')] },
 
       // CARDS
-      { id: 'total-cards', name: 'Total Cards', specifier: '3.5', group: 'cards', status: 'open', favorite: false, settled: null, selections: [
-        sel('tcard-o', 'Over 3.5'), sel('tcard-u', 'Under 3.5')] },
+      { id: 'total-cards', name: 'Total Cards', group: 'cards', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '2.5', id: 'total-cards-2.5', status: 'open', settled: null, selections: [sel('tcard25-o', 'Over'), sel('tcard25-u', 'Under')] },
+        { specifier: '3.5', id: 'total-cards-3.5', status: 'open', settled: null, selections: [sel('tcard35-o', 'Over'), sel('tcard35-u', 'Under')] },
+        { specifier: '4.5', id: 'total-cards-4.5', status: 'open', settled: null, selections: [sel('tcard45-o', 'Over'), sel('tcard45-u', 'Under')] },
+        { specifier: '5.5', id: 'total-cards-5.5', status: 'open', settled: null, selections: [sel('tcard55-o', 'Over'), sel('tcard55-u', 'Under')] },
+      ] },
       { id: 'first-card', name: 'First Card', group: 'cards', status: 'open', favorite: false, settled: null, selections: [
         sel('fcard-1', 'Man Utd'), sel('fcard-2', 'Liverpool')] },
       { id: 'player-card', name: 'Player To Be Carded', group: 'cards', status: 'open', favorite: false, settled: null, selections: [
@@ -598,10 +607,11 @@
         sel('pc-szo', 'Szoboszlai'), sel('pc-dal', 'Dalot'), sel('pc-rob', 'Robertson')] },
 
       // HANDICAP
-      { id: 'asian-handicap', name: 'Asian Handicap', specifier: '-0.5', group: 'handicap', status: 'open', favorite: false, settled: null, selections: [
-        sel('ah-1', 'Man Utd -0.5'), sel('ah-2', 'Liverpool +0.5')] },
-      { id: 'asian-handicap-1.5', name: 'Asian Handicap', specifier: '-1.5', group: 'handicap', status: 'open', favorite: false, settled: null, selections: [
-        sel('ah15-1', 'Man Utd -1.5'), sel('ah15-2', 'Liverpool +1.5')] },
+      { id: 'asian-handicap', name: 'Asian Handicap', group: 'handicap', status: 'open', favorite: false, settled: null, lines: [
+        { specifier: '-0.5', id: 'asian-handicap-0.5', status: 'open', settled: null, selections: [sel('ah05-1', 'Man Utd'), sel('ah05-2', 'Liverpool')] },
+        { specifier: '-1.5', id: 'asian-handicap-1.5', status: 'open', settled: null, selections: [sel('ah15-1', 'Man Utd'), sel('ah15-2', 'Liverpool')] },
+        { specifier: '-2.5', id: 'asian-handicap-2.5', status: 'open', settled: null, selections: [sel('ah25-1', 'Man Utd'), sel('ah25-2', 'Liverpool')] },
+      ] },
       { id: 'european-handicap', name: 'European Handicap', specifier: '0:1', group: 'handicap', status: 'open', favorite: false, settled: null, selections: [
         sel('eh-1', 'Man Utd'), sel('eh-x', 'Draw'), sel('eh-2', 'Liverpool')] },
 
